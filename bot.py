@@ -1,9 +1,6 @@
 import asyncio
 import discordbot
 
-
-
-
 bot = discordbot.DiscordBot()
 
 @bot.command(pass_context=True)
@@ -62,13 +59,18 @@ async def removeGame(ctx):
         listBackup.remove(gameToRemove)
     print(listBackup)
 
-    file = open('games.txt', 'w')
-    for game in listBackup:
-        file.write('{} \n'.format(game))
+    try:
+        file = open('games.txt', 'w')
+        for game in listBackup:
+            file.write('{} \n'.format(game))
+        await bot.send_message(ctx.message.channel, 'It worked! your game has been burned to the death :D')
+    except Exception as e:
+        print(e)
+        await bot.send_message(ctx.message.channel, 'Something went wrong, telling my boss about the current mistake. Try again later')
+    finally:
+        file.close()
 
-    file.close()
 
-    await bot.send_message(ctx.message.channel, 'It worked! your game has been burned to the death :D')
 
 #Execute bot.py
 bot.run()
