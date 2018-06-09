@@ -1,0 +1,16 @@
+{
+  "games": [
+    {
+      "game":"Halo",
+      "price": "unknown",
+      "retail": "unknown",
+      "deal_link": "unknown"
+    },
+    {
+      "game":"FIFA",
+      "price": "unknown",
+      "retail": "unknown",
+      "deal_link": "unknown"
+    }
+  ]
+}
