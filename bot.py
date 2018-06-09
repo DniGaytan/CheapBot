@@ -1,3 +1,4 @@
+import json
 import asyncio
 import discordbot
 
@@ -8,13 +9,27 @@ async def addGame(ctx):
 
     #Revise if the message sent has addtional characters than just the command
     if len(ctx.message.content) > 9:
-        # Adds the message for further modifications
-        writable = ctx.message.content[10:]
+        gameTitle = ctx.message.content[10:]
+
+        newGame = {
+            "game": gameTitle,
+            "discount_price": "unknown",
+            "discount_store": "unknown",
+            "deal_link": "unknown",
+            "platform": "unknown"
+        }
 
         try:
-            file = open('games.txt', 'a')
-            numValue = file.write(writable + '\n')
-            file.close()
+            jsonFile = open('games.json', 'r')
+            jsonDict = json.load(jsonFile)
+            jsonFile.close()
+
+            jsonDict['games'].append(newGame)
+
+            jsonFile = open('games.json', 'w')
+            jsonFile.write(json.dumps(jsonDict))
+            jsonFile.close()
+
             await bot.send_message(ctx.message.channel,
                                    'Thank you, game has been added to the list. I will start looking for discounts just for you <3')
         except Exception as e:
@@ -28,14 +43,15 @@ async def addGame(ctx):
 @bot.command(pass_context = True)
 async def showList(ctx):
     finalMessage = ''
-    file = open('games.txt', 'r')
+    jsonFile = open("games.json", 'r')
+    jsonDict = json.load(jsonFile)
+    jsonFile.close()
 
     counter = 1
-    for nextGame in file:
-        finalMessage += '{}.- {} \n'.format(str(counter), nextGame)
+    for game in jsonDict['games']:
+        finalMessage += "{}.- {} \n".format(counter, game['game'])
         counter += 1
 
-    file.close()
 
     if len(finalMessage) > 0:
         await bot.send_message(ctx.message.channel, finalMessage)
@@ -45,30 +61,28 @@ async def showList(ctx):
 
 @bot.command(pass_context = True)
 async def removeGame(ctx):
-    gameToRemove = ctx.message.content[13:] + "\n"
-    listBackup = []
-    file = open('games.txt', 'r')
+    gameToRemove = ctx.message.content[13:]
+    jsonFile = open('games.json', 'r')
+    jsonDict = json.load(jsonFile)
+    jsonFile.close()
 
-    for game in file:
-        listBackup.append(game)
+    for game in jsonDict['games']:
+        if game['game'] == gameToRemove:
+            jsonDict['games'].remove(game)
+            try:
+                jsonFile = open('games.json', 'w')
+                jsonFile.write(json.dumps(jsonDict))
+                await bot.send_message(ctx.message.channel, 'It worked! your game has been burned to the death :D')
+            except Exception as e:
+                print(e)
+                await bot.send_message(ctx.message.channel,
+                                       'Something went wrong, telling my boss about the current mistake. Try again later')
+            finally:
+                jsonFile.close()
 
-    file.close()
 
 
-    while gameToRemove in listBackup:
-        listBackup.remove(gameToRemove)
-    print(listBackup)
 
-    try:
-        file = open('games.txt', 'w')
-        for game in listBackup:
-            file.write('{} \n'.format(game))
-        await bot.send_message(ctx.message.channel, 'It worked! your game has been burned to the death :D')
-    except Exception as e:
-        print(e)
-        await bot.send_message(ctx.message.channel, 'Something went wrong, telling my boss about the current mistake. Try again later')
-    finally:
-        file.close()
 
 
 
